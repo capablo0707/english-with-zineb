@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Setup - ENGLISH WITH ZINEB</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    
+    <style>
+        .setup-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .setup-card {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .setup-header {
+            margin-bottom: 2rem;
+        }
+
+        .setup-header h1 {
+            color: #1f2937;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .setup-header p {
+            color: #6b7280;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            color: #1f2937;
+            background: white;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #2563eb;
+            background: white;
+        }
+
+        .setup-btn {
+            width: 100%;
+            padding: 1rem;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .setup-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .setup-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-message {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .status-message.success {
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+
+        .status-message.error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .status-message.info {
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 1rem;
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .log-container {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+            text-align: left;
+            font-family: monospace;
+            font-size: 0.8rem;
+        }
+
+        .log-entry {
+            margin-bottom: 0.5rem;
+            padding: 0.25rem 0;
+        }
+
+        .log-entry.success {
+            color: #16a34a;
+        }
+
+        .log-entry.error {
+            color: #dc2626;
+        }
+
+        .log-entry.info {
+            color: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <div class="setup-card">
+            <div class="setup-header">
+                <h1><i class="fas fa-tools"></i> Admin Setup</h1>
+                <p>Create admin user and fix permissions</p>
+            </div>
+
+            <div id="statusMessage" class="status-message"></div>
+
+            <form id="setupForm">
+                <div class="form-group">
+                    <label for="adminEmail">Admin Email</label>
+                    <input type="email" id="adminEmail" placeholder="admin@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="adminPassword">Admin Password</label>
+                    <input type="password" id="adminPassword" placeholder="Enter password" required>
+                </div>
+                <div class="form-group">
+                    <label for="adminName">Admin Name</label>
+                    <input type="text" id="adminName" placeholder="Admin" value="Admin">
+                </div>
+                
+                <button type="submit" class="setup-btn" id="setupBtn">
+                    <i class="fas fa-user-plus"></i> Create Admin User
+                </button>
+            </form>
+
+            <button class="setup-btn" onclick="testConnection()" style="background: #10b981;">
+                <i class="fas fa-wifi"></i> Test Connection
+            </button>
+
+            <button class="setup-btn" onclick="checkAdminStatus()" style="background: #f59e0b;">
+                <i class="fas fa-user-check"></i> Check Admin Status
+            </button>
+
+            <div class="log-container" id="logContainer">
+                <div class="log-entry info">Ready to setup admin user...</div>
+            </div>
+
+            <a href="login.html" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Login
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function showMessage(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message ${type}`;
+            statusDiv.style.display = 'block';
+        }
+
+        function addLog(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        async function testConnection() {
+            addLog('Testing Firebase connection...', 'info');
+            try {
+                await DatabaseService.healthCheck();
+                addLog('✅ Firebase connection successful!', 'success');
+                showMessage('Firebase connection is working!', 'success');
+            } catch (error) {
+                addLog(`❌ Firebase connection failed: ${error.message}`, 'error');
+                showMessage(`Connection failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkAdminStatus() {
+            addLog('Checking admin status...', 'info');
+            try {
+                const isAdmin = await DatabaseService.isCurrentUserAdmin();
+                if (isAdmin) {
+                    addLog('✅ Current user is admin!', 'success');
+                    showMessage('Current user has admin privileges!', 'success');
+                } else {
+                    addLog('❌ Current user is not admin or not logged in', 'error');
+                    showMessage('Current user is not admin. Please login as admin.', 'error');
+                }
+            } catch (error) {
+                addLog(`❌ Error checking admin status: ${error.message}`, 'error');
+                showMessage(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        document.getElementById('setupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            const name = document.getElementById('adminName').value;
+            const setupBtn = document.getElementById('setupBtn');
+            
+            setupBtn.disabled = true;
+            setupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+            
+            addLog(`Creating admin user: ${email}`, 'info');
+            
+            try {
+                const user = await DatabaseService.createAdminUser(email, password, name);
+                addLog(`✅ Admin user created successfully: ${user.email}`, 'success');
+                showMessage('Admin user created successfully! You can now login.', 'success');
+                
+                // Auto-login the user
+                setTimeout(() => {
+                    window.location.href = 'admin-dashboard.html';
+                }, 2000);
+                
+            } catch (error) {
+                addLog(`❌ Error creating admin user: ${error.message}`, 'error');
+                showMessage(`Error: ${error.message}`, 'error');
+            } finally {
+                setupBtn.disabled = false;
+                setupBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Admin User';
+            }
+        });
+
+        // Auto-test connection on page load
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                testConnection();
+            }, 1000);
+        });
+    </script>
+</body>
+</html> 

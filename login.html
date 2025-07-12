@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - ENGLISH WITH ZINEB</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <style>
+        .login-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-header {
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            color: #1f2937;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: #6b7280;
+        }
+
+        .login-tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #e5e7eb;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            background: #f9fafb;
+            color: #6b7280;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        .login-form {
+            display: none;
+        }
+
+        .login-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            color: #1f2937;
+            background: white;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #2563eb;
+            background: white;
+        }
+
+        .form-group input::placeholder {
+            color: #9ca3af;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 1rem;
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .success-message {
+            background: #f0fdf4;
+            color: #16a34a;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 1rem;
+            }
+            
+            .login-card {
+                padding: 2rem 1.5rem;
+                max-width: 100%;
+            }
+            
+            .login-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .login-header p {
+                font-size: 0.9rem;
+            }
+            
+            .login-tabs {
+                margin-bottom: 1.5rem;
+            }
+            
+            .tab-button {
+                padding: 0.8rem;
+                font-size: 0.9rem;
+            }
+            
+            .form-group input {
+                padding: 0.8rem;
+                font-size: 0.9rem;
+            }
+            
+            .login-btn {
+                padding: 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 0.5rem;
+            }
+            
+            .login-card {
+                padding: 1.5rem 1rem;
+            }
+            
+            .login-header h1 {
+                font-size: 1.3rem;
+            }
+            
+            .login-header p {
+                font-size: 0.8rem;
+            }
+            
+            .tab-button {
+                padding: 0.6rem;
+                font-size: 0.8rem;
+            }
+            
+            .form-group input {
+                padding: 0.7rem;
+                font-size: 0.8rem;
+            }
+            
+            .login-btn {
+                padding: 0.7rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1><i class="fas fa-graduation-cap"></i> ENGLISH WITH ZINEB</h1>
+                <p>Welcome back! Please login to continue.</p>
+            </div>
+
+            <div class="login-tabs">
+                <button class="tab-button active" onclick="switchTab('student')">Student</button>
+                <button class="tab-button" onclick="switchTab('admin')">Admin</button>
+            </div>
+
+            <div id="errorMessage" class="error-message"></div>
+            <div id="successMessage" class="success-message"></div>
+
+            <!-- Student Login Form -->
+            <form id="studentLoginForm" class="login-form active">
+                <div class="form-group">
+                    <label for="studentEmail">Email</label>
+                    <input type="email" id="studentEmail" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="studentPassword">Password</label>
+                    <input type="password" id="studentPassword" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="login-btn">Login as Student</button>
+            </form>
+
+            <!-- Admin Login Form (now uses email/password) -->
+            <form id="adminLoginForm" class="login-form">
+                <div class="form-group">
+                    <label for="adminEmail">Email</label>
+                    <input type="email" id="adminEmail" placeholder="Enter admin email" required>
+                </div>
+                <div class="form-group">
+                    <label for="adminPassword">Password</label>
+                    <input type="password" id="adminPassword" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="login-btn">Login as Admin</button>
+            </form>
+
+            <a href="index.html" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Sample user data (in a real app, this would come from a database)
+        const students = [
+            { email: 'student1@example.com', password: 'password123', name: 'John Doe' },
+            { email: 'student2@example.com', password: 'password123', name: 'Jane Smith' }
+        ];
+
+        const admin = {
+            username: 'admin',
+            password: 'admin123'
+        };
+
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update forms
+            document.querySelectorAll('.login-form').forEach(form => {
+                form.classList.remove('active');
+            });
+
+            if (tab === 'student') {
+                document.getElementById('studentLoginForm').classList.add('active');
+            } else {
+                document.getElementById('adminLoginForm').classList.add('active');
+            }
+
+            // Clear messages
+            hideMessages();
+        }
+
+        function showMessage(message, type) {
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+
+            if (type === 'error') {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+                successDiv.style.display = 'none';
+            } else {
+                successDiv.textContent = message;
+                successDiv.style.display = 'block';
+                errorDiv.style.display = 'none';
+            }
+        }
+
+        function hideMessages() {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        // Firebase login for both admin and student
+        async function firebaseLogin(email, password, expectedType) {
+            hideMessages();
+            try {
+                const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                // Get user type from Firestore
+                const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+                const userData = userDoc.data();
+                if (!userData) {
+                    showMessage('User profile not found in database.', 'error');
+                    return;
+                }
+                if (userData.type !== expectedType) {
+                    showMessage(`This account is not a ${expectedType}.`, 'error');
+                    return;
+                }
+                // Save user info to localStorage
+                localStorage.setItem('currentUser', JSON.stringify({
+                    uid: user.uid,
+                    name: userData.name,
+                    email: userData.email,
+                    type: userData.type
+                }));
+                showMessage('Login successful! Redirecting...', 'success');
+                setTimeout(() => {
+                    if (expectedType === 'admin') {
+                        window.location.href = 'admin-dashboard.html';
+                    } else {
+                        window.location.href = 'student-dashboard.html';
+                    }
+                }, 1200);
+            } catch (error) {
+                showMessage(error.message, 'error');
+            }
+        }
+
+        // Student Login
+        const studentLoginForm = document.getElementById('studentLoginForm');
+        studentLoginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('studentEmail').value;
+            const password = document.getElementById('studentPassword').value;
+            firebaseLogin(email, password, 'student');
+        });
+
+        // Admin Login
+        const adminLoginForm = document.getElementById('adminLoginForm');
+        adminLoginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            firebaseLogin(email, password, 'admin');
+        });
+
+        // Check if user is already logged in
+        window.addEventListener('load', function() {
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                const user = JSON.parse(currentUser);
+                if (user.type === 'student') {
+                    window.location.href = 'student-dashboard.html';
+                } else if (user.type === 'admin') {
+                    window.location.href = 'admin-dashboard.html';
+                }
+            }
+        });
+    </script>
+</body>
+</html> 
