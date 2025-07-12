@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - ENGLISH WITH ZINEB</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
+    <script src="firebase-config.js?v=" + Date.now()></script>
+    
+    <style>
+        .dashboard-container {
+            min-height: 100vh;
+            background: #f8fafc;
+            padding-top: 80px;
+        }
+
+        .dashboard-header {
+            background: white;
+            padding: 2rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-nav {
+            background: white;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .nav-tab {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: #f3f4f6;
+            color: #6b7280;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 1rem;
+            box-shadow:
+                0 4px 16px 0 rgba(37, 99, 235, 0.15),
+                0 2px 8px 0 rgba(37, 99, 235, 0.10),
+                0 1px 4px 0 rgba(0,0,0,0.08);
+            z-index: 2;
+            position: relative;
+        }
+
+        .nav-tab:hover {
+            background: #e5e7eb;
+            transform: translateY(-2px);
+            box-shadow:
+                0 8px 24px 0 rgba(37, 99, 235, 0.25),
+                0 4px 12px 0 rgba(37, 99, 235, 0.15),
+                0 2px 6px 0 rgba(0,0,0,0.12);
+        }
+
+        .nav-tab.active {
+            background: #2563eb;
+            color: white;
+            box-shadow:
+                0 8px 24px 0 rgba(37, 99, 235, 0.35),
+                0 4px 16px 0 rgba(37, 99, 235, 0.25),
+                0 2px 8px 0 rgba(37, 99, 235, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .dashboard-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 20px;
+        }
+
+        .welcome-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .welcome-section h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-section p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 22px;
+            box-shadow:
+                0 24px 64px 0 rgba(37, 99, 235, 0.40),
+                0 8px 32px 0 rgba(37, 99, 235, 0.22),
+                0 2px 8px 0 rgba(0,0,0,0.18);
+            text-align: center;
+            z-index: 2;
+            position: relative;
+        }
+
+        .stat-card i {
+            font-size: 2rem;
+            color: #2563eb;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .content-section {
+            background: white;
+            border-radius: 22px;
+            padding: 2rem;
+            box-shadow:
+                0 24px 64px 0 rgba(37, 99, 235, 0.40),
+                0 8px 32px 0 rgba(37, 99, 235, 0.22),
+                0 2px 8px 0 rgba(0,0,0,0.18);
+            margin-bottom: 2rem;
+            z-index: 2;
+            position: relative;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .video-card {
+            background: white;
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow:
+                0 24px 64px 0 rgba(37, 99, 235, 0.40),
+                0 8px 32px 0 rgba(37, 99, 235, 0.22),
+                0 2px 8px 0 rgba(0,0,0,0.18);
+            transition: all 0.3s ease;
+            z-index: 2;
+            position: relative;
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+            box-shadow:
+                0 32px 80px 0 rgba(37, 99, 235, 0.50),
+                0 12px 40px 0 rgba(37, 99, 235, 0.30),
+                0 4px 12px 0 rgba(0,0,0,0.20);
+        }
+
+        .video-thumbnail {
+            height: 150px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .video-thumbnail i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .play-button:hover {
+            background: white;
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .play-button i {
+            color: #2563eb;
+            font-size: 1.5rem;
+        }
+
+        .video-content {
+            padding: 1rem;
+        }
+
+        .video-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #1f2937;
+        }
+
+        .video-description {
+            color: #6b7280;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+
+        .premium-badge {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #1f2937;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+            transition: width 0.3s ease;
+        }
+
+        /* Mobile Responsive Styles for Student Dashboard */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding-top: 60px;
+            }
+            
+            .dashboard-header {
+                padding: 1rem 0;
+            }
+            
+            .dashboard-header h1 {
+                font-size: 1.5rem;
+                text-align: center;
+            }
+            
+            .nav-tabs {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                padding: 0 10px;
+            }
+            
+            .nav-tab {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+                flex: 1;
+                min-width: 120px;
+            }
+            
+            .dashboard-content {
+                padding: 1rem 10px;
+            }
+            
+            .welcome-section {
+                padding: 1.5rem;
+                margin-bottom: 1rem;
+            }
+            
+            .welcome-section h2 {
+                font-size: 1.5rem;
+            }
+            
+            .welcome-section p {
+                font-size: 1rem;
+            }
+            
+            .stats-grid {
+                gap: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .stat-card {
+                padding: 1rem;
+            }
+            
+            .stat-card i {
+                font-size: 1.5rem;
+            }
+            
+            .stat-number {
+                font-size: 1.5rem;
+            }
+            
+            .content-section {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .section-header h2 {
+                font-size: 1.5rem;
+            }
+            
+            .video-grid {
+                gap: 1rem;
+            }
+            
+            .video-card {
+                margin-bottom: 1rem;
+            }
+            
+            .video-thumbnail {
+                height: 120px;
+            }
+            
+            .video-content {
+                padding: 0.8rem;
+            }
+            
+            .video-title {
+                font-size: 1rem;
+            }
+            
+            .video-description {
+                font-size: 0.8rem;
+            }
+            
+            .video-meta {
+                font-size: 0.8rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .premium-badge {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.6rem;
+            }
+            
+            .progress-bar {
+                height: 4px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dashboard-header h1 {
+                font-size: 1.3rem;
+            }
+            
+            .nav-tab {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+                min-width: 100px;
+            }
+            
+            .welcome-section {
+                padding: 1rem;
+            }
+            
+            .welcome-section h2 {
+                font-size: 1.3rem;
+            }
+            
+            .stat-card {
+                padding: 0.8rem;
+            }
+            
+            .stat-number {
+                font-size: 1.3rem;
+            }
+            
+            .content-section {
+                padding: 0.8rem;
+            }
+            
+            .section-header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .video-thumbnail {
+                height: 100px;
+            }
+            
+            .video-content {
+                padding: 0.6rem;
+            }
+            
+            .video-title {
+                font-size: 0.9rem;
+            }
+            
+            .video-description {
+                font-size: 0.75rem;
+            }
+            
+            .premium-badge {
+                font-size: 0.6rem;
+                padding: 0.15rem 0.5rem;
+            }
+        }
+
+        .video-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #10b981;
+            transition: width 0.3s ease;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .premium-badge {
+            background: #fbbf24;
+            color: #1f2937;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+
+        .quiz-choice-btn {
+            padding: 1rem;
+            border-radius: 12px;
+            background: #f3f4f6;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow:
+                0 8px 24px 0 rgba(37, 99, 235, 0.25),
+                0 4px 12px 0 rgba(37, 99, 235, 0.15),
+                0 2px 6px 0 rgba(0,0,0,0.10);
+            z-index: 2;
+            position: relative;
+        }
+
+        .quiz-choice-btn:hover {
+            background: #f8fafc;
+            transform: translateY(-3px) scale(1.02);
+            box-shadow:
+                0 16px 40px 0 rgba(37, 99, 235, 0.35),
+                0 8px 20px 0 rgba(37, 99, 235, 0.25),
+                0 4px 12px 0 rgba(0,0,0,0.15);
+        }
+
+        .quiz-choice-btn:active {
+            box-shadow:
+                0 4px 12px 0 rgba(16,185,129,0.25),
+                0 2px 6px 0 rgba(16,185,129,0.15);
+            transform: translateY(0) scale(1);
+        }
+
+        .wordwall-btn {
+            padding: 1.2rem;
+            border-radius: 12px;
+            background: #f3f4f6;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1f2937;
+            transition: all 0.2s;
+            width: 100%;
+            box-shadow:
+                0 8px 24px 0 rgba(37, 99, 235, 0.25),
+                0 4px 12px 0 rgba(37, 99, 235, 0.15),
+                0 2px 6px 0 rgba(0,0,0,0.10);
+            z-index: 2;
+            position: relative;
+        }
+
+        .wordwall-btn:hover {
+            background: #f8fafc;
+            transform: translateY(-3px) scale(1.02);
+            box-shadow:
+                0 16px 40px 0 rgba(37, 99, 235, 0.35),
+                0 8px 20px 0 rgba(37, 99, 235, 0.25),
+                0 4px 12px 0 rgba(0,0,0,0.15);
+        }
+
+        .wordwall-btn:active {
+            box-shadow:
+                0 4px 12px 0 rgba(16,185,129,0.25),
+                0 2px 6px 0 rgba(16,185,129,0.15);
+            transform: translateY(0) scale(1);
+        }
+
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+
+            .section-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            .welcome-section h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="container">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h1><i class="fas fa-graduation-cap"></i> ENGLISH WITH ZINEB - Student Dashboard</h1>
+                    <button class="logout-btn" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="dashboard-nav">
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="switchTab('overview')">Overview</button>
+                <button class="nav-tab" onclick="switchTab('paid-videos')">Premium Videos</button>
+                <button class="nav-tab" onclick="switchTab('quiz-game')">Quiz Game</button>
+            </div>
+        </nav>
+
+        <!-- Dashboard Content -->
+        <main class="dashboard-content">
+            <!-- Welcome Section -->
+            <div class="welcome-section">
+                <h2>Welcome back, <span id="studentName">Student</span>!</h2>
+                <p>Continue your English learning journey with our premium content</p>
+            </div>
+
+            <!-- Overview Tab -->
+            <div id="overview" class="content-section">
+                <h2>Your Learning Overview</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <i class="fas fa-play-circle"></i>
+                        <div class="stat-number" id="videosWatched">0</div>
+                        <div class="stat-label">Videos Watched</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-clock"></i>
+                        <div class="stat-number" id="totalTime">0</div>
+                        <div class="stat-label">Hours Learned</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-trophy"></i>
+                        <div class="stat-number" id="achievements">0</div>
+                        <div class="stat-label">Achievements</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paid Videos Tab -->
+            <div id="paid-videos" class="content-section hidden">
+                <div class="section-header">
+                    <h2>Premium Learning Content</h2>
+                    <p>Access exclusive videos created by our expert instructors</p>
+                </div>
+
+                <div class="video-grid" id="paidVideosGrid">
+                    <!-- Paid videos will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Quiz Game Tab -->
+            <div id="quiz-game" class="content-section hidden">
+                <div class="section-header">
+                    <h2>Quiz Game</h2>
+                    <p>Test your knowledge with interactive quizzes</p>
+                </div>
+
+                <div id="quizContainer">
+                    <!-- Quiz content will be loaded here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Check authentication
+        window.addEventListener('load', async function() {
+            const currentUser = localStorage.getItem('currentUser');
+            if (!currentUser) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            const user = JSON.parse(currentUser);
+            if (user.type !== 'student') {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Set student name
+            document.getElementById('studentName').textContent = user.name || 'Student';
+            
+            await loadStudentData();
+        });
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+        }
+
+        function switchTab(tab) {
+            // Hide all content sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.nav-tab').forEach(tabBtn => {
+                tabBtn.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tab).classList.remove('hidden');
+            event.target.classList.add('active');
+
+            // Load quiz data when quiz tab is selected
+            if (tab === 'quiz-game') {
+                loadQuizGame();
+            }
+            
+            // Load paid videos when paid videos tab is selected
+            if (tab === 'paid-videos') {
+                loadStudentData();
+            }
+        }
+
+        function openVideoModal(videoUrl, title, isUploaded = false) {
+            console.log('Opening video modal:', { videoUrl, title, isUploaded });
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            
+            if (isUploaded) {
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <span class="close" onclick="closeVideoModal()">&times;</span>
+                        <h2>${title}</h2>
+                        <div class="video-container">
+                            <video controls style="width: 100%;" onerror="console.error('Video error:', this.error)">
+                                <source src="${videoUrl}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    </div>
+                `;
+            } else {
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <span class="close" onclick="closeVideoModal()">&times;</span>
+                        <h2>${title}</h2>
+                        <div class="video-container">
+                            <iframe src="${videoUrl}" frameborder="0" allowfullscreen onerror="console.error('Iframe error')"></iframe>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            document.body.appendChild(modal);
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeVideoModal();
+                }
+            });
+
+            // Track video watch
+            trackVideoWatch(title);
+        }
+
+        function closeVideoModal() {
+            const modal = document.querySelector('.modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        function trackVideoWatch(videoTitle) {
+            const watchedVideos = JSON.parse(localStorage.getItem('watchedVideos') || '[]');
+            if (!watchedVideos.includes(videoTitle)) {
+                watchedVideos.push(videoTitle);
+                localStorage.setItem('watchedVideos', JSON.stringify(watchedVideos));
+                loadStudentData();
+            }
+        }
+
+        // Replace the old loadStudentData function with an async version that fetches paid videos from Firestore
+        async function loadStudentData() {
+            try {
+                // Fetch paid videos from Firestore
+                console.log('Fetching paid videos...');
+                const paidVideos = await DatabaseService.getVideos('paid');
+                console.log('Paid videos fetched:', paidVideos);
+                
+                const watchedVideos = JSON.parse(localStorage.getItem('watchedVideos') || '[]');
+                
+                // Update stats
+                document.getElementById('videosWatched').textContent = watchedVideos.length;
+                document.getElementById('totalTime').textContent = Math.round(watchedVideos.length * 0.5); // Assuming 30 min per video
+                document.getElementById('achievements').textContent = Math.floor(watchedVideos.length / 3); // Achievement every 3 videos
+                
+                // Load paid videos
+                const paidVideosGrid = document.getElementById('paidVideosGrid');
+                
+                if (paidVideos.length === 0) {
+                    paidVideosGrid.innerHTML = `
+                        <div style="text-align: center; padding: 3rem; color: #6b7280; grid-column: 1 / -1;">
+                            <i class="fas fa-crown" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                            <h3>No premium videos available yet</h3>
+                            <p>Check back later for exclusive content!</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                paidVideosGrid.innerHTML = paidVideos.map(video => {
+                    const isWatched = watchedVideos.includes(video.title);
+                    const progress = isWatched ? 100 : 0;
+                    const isUploadedVideo = !!video.fileType;
+                    
+                    return `
+                        <div class="video-card">
+                            <div class="video-thumbnail" onclick="openVideoModal('${video.videoUrl}', '${video.title}', ${isUploadedVideo})">
+                                ${isUploadedVideo ? `
+                                    <video style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                                        <source src="${video.videoUrl}" type="${video.fileType}">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                ` : '<i class="fas fa-crown"></i>'}
+                                <div class="play-button">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <div class="video-content">
+                                <div class="premium-badge">Premium</div>
+                                <h3 class="video-title">${video.title}</h3>
+                                <p class="video-description">${video.description}</p>
+                                <div class="video-meta">
+                                    <span><i class="fas fa-clock"></i> ${video.duration}</span>
+                                    ${video.fileSize ? `<span><i class="fas fa-file"></i> ${video.fileSize}</span>` : ''}
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${progress}%"></div>
+                                </div>
+                                <small style="color: #6b7280; margin-top: 0.5rem; display: block;">
+                                    ${isWatched ? 'Completed' : 'Not started'}
+                                </small>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading student data:', error);
+                const paidVideosGrid = document.getElementById('paidVideosGrid');
+                paidVideosGrid.innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: #ef4444; grid-column: 1 / -1;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <h3>Error loading premium videos</h3>
+                        <p>Please try refreshing the page or contact support.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Quiz game functionality
+        let currentQuizIndex = 0;
+        let quizzes = [];
+        let quizScore = 0;
+        let quizAnswered = false;
+        let selectedAnswerIndex = null;
+        let quizSection = null;
+
+        async function loadQuizGame() {
+            try {
+                quizzes = await DatabaseService.getQuizzes();
+                currentQuizIndex = 0;
+                quizScore = 0;
+                quizSection = null;
+                if (quizzes.length === 0) {
+                    document.getElementById('quizContainer').innerHTML = `
+                        <div style="text-align: center; padding: 3rem; color: #6b7280;">
+                            <i class="fas fa-question-circle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                            <h3>No quizzes available yet</h3>
+                            <p>Check back later for interactive quizzes!</p>
+                        </div>
+                    `;
+                    return;
+                }
+                // Extract unique sections
+                const sections = [...new Set(quizzes.map(q => q.section || 'Uncategorized'))];
+                document.getElementById('quizContainer').innerHTML = `
+                    <div style="max-width: 500px; margin: 0 auto; text-align: center;">
+                        <h2 style="color: #2563eb; margin-bottom: 2rem;">Choose a Section</h2>
+                        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                            ${sections.map(section => `
+                                <button onclick="startQuizSection('${section.replace(/'/g, '\'')}')" style="background: #2563eb; color: white; border: none; padding: 1.2rem; border-radius: 10px; font-size: 1.2rem; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(37,99,235,0.12);">${section}</button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading quizzes:', error);
+                document.getElementById('quizContainer').innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: #ef4444;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <h3>Error loading quizzes</h3>
+                        <p>Please try again later.</p>
+                    </div>
+                `;
+            }
+        }
+
+        window.startQuizSection = function(section) {
+            quizSection = section;
+            currentQuizIndex = 0;
+            quizScore = 0;
+            // Filter quizzes by section
+            quizzes = quizzes.filter(q => (q.section || 'Uncategorized') === section);
+            displayQuiz();
+        }
+
+        function displayQuiz() {
+            quizAnswered = false;
+            selectedAnswerIndex = null;
+            if (currentQuizIndex >= quizzes.length) {
+                showQuizResults();
+                return;
+            }
+
+            const quiz = quizzes[currentQuizIndex];
+            const container = document.getElementById('quizContainer');
+            
+            container.innerHTML = `
+                <div class="quiz-card" style="max-width: 600px; margin: 0 auto;">
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <div style="font-size: 1.1rem; color: #2563eb; font-weight: 600; margin-bottom: 0.5rem;">Question ${currentQuizIndex + 1} of ${quizzes.length}</div>
+                        <div style="height: 8px; background: #e5e7eb; border-radius: 4px; margin-bottom: 1rem; overflow: hidden;">
+                            <div style="height: 100%; background: #2563eb; width: ${(100 * (currentQuizIndex) / quizzes.length)}%; transition: width 0.3s;"></div>
+                        </div>
+                    </div>
+                    <div style="background: white; border-radius: 18px; padding: 2rem; box-shadow: none; margin-bottom: 2rem; border: none;">
+                        <h2 style="text-align: center; margin-bottom: 1.5rem; color: #1f2937; font-size: 1.5rem;">${quiz.title}</h2>
+                        ${quiz.imageUrl ? `<div style="text-align: center; margin-bottom: 2rem;"><img src="${quiz.imageUrl}" alt="Quiz Image" style="max-width: 100%; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);"></div>` : ''}
+                        <div id="choicesContainer" style="display: grid; gap: 1.5rem;">
+                            ${quiz.choices.map((choice, index) => `
+                                <button 
+                                    class="wordwall-btn quiz-choice-btn"
+                                    id="choiceBtn${index}"
+                                    onclick="selectAnswer(${index})"
+                                    style="
+                                        padding: 1.2rem;
+                                        border-radius: 12px;
+                                        background: #f3f4f6;
+                                        cursor: pointer;
+                                        text-align: left;
+                                        font-size: 1.2rem;
+                                        font-weight: 600;
+                                        color: #1f2937;
+                                        width: 100%;
+                                    "
+                                >
+                                    <span style="display: inline-block; width: 2.2rem; text-align: center; font-weight: bold;">${String.fromCharCode(65 + index)})</span> ${choice}
+                                </button>
+                            `).join('')}
+                        </div>
+                        <div id="feedbackContainer" style="margin-top: 2rem; min-height: 2.5rem; text-align: center;"></div>
+                        <div id="nextBtnContainer" style="text-align: center; margin-top: 2rem;"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.selectAnswer = function(selectedIndex) {
+            if (quizAnswered) return;
+            quizAnswered = true;
+            selectedAnswerIndex = selectedIndex;
+            const quiz = quizzes[currentQuizIndex];
+            const isCorrect = selectedIndex === quiz.correctAnswerIndex;
+            if (isCorrect) quizScore++;
+
+            // Highlight choices
+            quiz.choices.forEach((_, idx) => {
+                const btn = document.getElementById(`choiceBtn${idx}`);
+                if (!btn) return;
+                btn.disabled = true;
+                if (idx === quiz.correctAnswerIndex) {
+                    btn.style.background = '#d1fae5';
+                    btn.style.borderColor = '#10b981';
+                    btn.style.color = '#065f46';
+                }
+                if (idx === selectedIndex && !isCorrect) {
+                    btn.style.background = '#fee2e2';
+                    btn.style.borderColor = '#ef4444';
+                    btn.style.color = '#991b1b';
+                }
+            });
+
+            // Show feedback
+            const feedback = document.getElementById('feedbackContainer');
+            feedback.innerHTML = isCorrect
+                ? `<span style='color: #10b981; font-size: 1.2rem; font-weight: bold;'><i class="fas fa-check-circle"></i> Correct!</span>`
+                : `<span style='color: #ef4444; font-size: 1.2rem; font-weight: bold;'><i class="fas fa-times-circle"></i> Incorrect!<br>The correct answer is: <b>${quiz.choices[quiz.correctAnswerIndex]}</b></span>`;
+
+            // Show Next button
+            const nextBtn = document.getElementById('nextBtnContainer');
+            nextBtn.innerHTML = `<button onclick="nextQuiz()" style="background: #2563eb; color: white; border: none; padding: 1rem 2.5rem; border-radius: 10px; font-size: 1.2rem; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(37,99,235,0.12); margin-top: 1rem;">${currentQuizIndex + 1 < quizzes.length ? 'Next Question' : 'See Results'}</button>`;
+        }
+
+        function nextQuiz() {
+            currentQuizIndex++;
+            if (currentQuizIndex < quizzes.length) {
+                displayQuiz();
+            } else {
+                showQuizResults();
+            }
+        }
+
+        function showQuizResults() {
+            const percentage = Math.round((quizScore / quizzes.length) * 100);
+            const container = document.getElementById('quizContainer');
+            
+            let message = '';
+            let icon = '';
+            let color = '';
+            
+            if (percentage >= 90) {
+                message = 'Excellent! You\'re a quiz master!';
+                icon = 'fa-trophy';
+                color = '#fbbf24';
+            } else if (percentage >= 70) {
+                message = 'Great job! You have good knowledge!';
+                icon = 'fa-star';
+                color = '#10b981';
+            } else if (percentage >= 50) {
+                message = 'Good effort! Keep learning!';
+                icon = 'fa-thumbs-up';
+                color = '#3b82f6';
+            } else {
+                message = 'Keep practicing! You\'ll improve!';
+                icon = 'fa-lightbulb';
+                color = '#6b7280';
+            }
+            
+            container.innerHTML = `
+                <div style="max-width: 600px; margin: 0 auto;">
+                    <div style="background: white; border-radius: 12px; padding: 3rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center;">
+                        <i class="fas ${icon}" style="font-size: 4rem; color: ${color}; margin-bottom: 1rem;"></i>
+                        <h2 style="color: #1f2937; margin-bottom: 1rem;">Quiz Complete!</h2>
+                        <p style="color: #6b7280; font-size: 1.1rem; margin-bottom: 2rem;">${message}</p>
+                        
+                        <div style="background: #f8fafc; padding: 2rem; border-radius: 8px; margin-bottom: 2rem;">
+                            <h3 style="color: #1f2937; margin-bottom: 1rem;">Your Results</h3>
+                            <div style="font-size: 3rem; font-weight: bold; color: ${color}; margin-bottom: 0.5rem;">
+                                ${quizScore}/${quizzes.length}
+                            </div>
+                            <div style="font-size: 1.2rem; color: #6b7280;">
+                                ${percentage}% Correct
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 1rem; justify-content: center;">
+                            <button 
+                                onclick="loadQuizGame()"
+                                style="
+                                    background: #2563eb;
+                                    color: white;
+                                    border: none;
+                                    padding: 1rem 2rem;
+                                    border-radius: 8px;
+                                    font-weight: 600;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                "
+                                onmouseover="this.style.background='#1d4ed8';"
+                                onmouseout="this.style.background='#2563eb';"
+                            >
+                                Play Again
+                            </button>
+                            <button 
+                                onclick="switchTab('overview')"
+                                style="
+                                    background: #6b7280;
+                                    color: white;
+                                    border: none;
+                                    padding: 1rem 2rem;
+                                    border-radius: 8px;
+                                    font-weight: 600;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                "
+                                onmouseover="this.style.background='#4b5563';"
+                                onmouseout="this.style.background='#6b7280';"
+                            >
+                                Back to Dashboard
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Keyboard navigation for modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeVideoModal();
+            }
+        });
+    </script>
+</body>
+</html> 
